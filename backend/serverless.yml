@@ -1,5 +1,6 @@
+
 service:
-  name: serverless-todo-app
+  name: sshruti14-serverless-todo-app
 
 plugins:
   - serverless-webpack
@@ -33,6 +34,7 @@ provider:
     AUTH_0_SECRET: cO0ILpysCr4RKSUDwzSDJ1sbGAeuBNkpZSMr1xIrXwJx5C1qQdVXBMjb8F4aub0v
     S3_BUCKET: 'sshruti-serverless-todo-${self:provider.stage}'
     SIGNED_URL_EXPIRATION: 300
+    INDEX_NAME: UserIdIndex
 
 #TODO: add custom configuration
 custom:
@@ -92,7 +94,7 @@ functions:
       - Effect: Allow
         Action:
           - dynamodb:Query
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/UserIdIndex
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.INDEX_NAME}
 
   # TODO: Configure this function
   CreateTodo:
@@ -151,8 +153,7 @@ functions:
       - Effect: Allow
         Action:
           - dynamodb:DeleteItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
-
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.INDEX_NAME}
   # TODO: Configure this function
   GenerateUploadUrl:
     handler: src/lambda/http/generateUploadUrl.handler
@@ -182,8 +183,8 @@ resources:
         ResponseParameters:
           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
           gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
-          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
-          gatewayresponse.header.Access-Control-Allow-Methods: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
         ResponseType: DEFAULT_4XX
         RestApiId:
           Ref: ApiGatewayRestApi
@@ -200,10 +201,12 @@ resources:
           - AttributeName: todoId
             KeyType: HASH
         GlobalSecondaryIndexes:
-          - IndexName: UserIdIndex
+          - IndexName: ${self:provider.environment.INDEX_NAME}
             KeySchema:
               - AttributeName: userId
                 KeyType: HASH
+              - AttributeName: todoId
+                KeyType: RANGE
             Projection:
               ProjectionType: ALL
         BillingMode: PAY_PER_REQUEST
