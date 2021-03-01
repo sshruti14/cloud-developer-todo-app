@@ -120,8 +120,8 @@ export class TodoAccessModel {
       .delete({
         TableName: this.todosTable,
         Key: {
-          todoId,
-          userId,
+          todoId: todoId,
+          userId: userId,
         },
       })
       .promise();

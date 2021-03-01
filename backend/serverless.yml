@@ -1,6 +1,6 @@
 
 service:
-  name: serverless-todo-app
+  name: shruti14-serverless-todo-app
 
 plugins:
   - serverless-webpack
@@ -13,7 +13,7 @@ plugins:
 
 provider:
   name: aws
-  runtime: nodejs10.x
+  runtime: nodejs12.x
 
   tracing:
     apiGateway: true
@@ -157,9 +157,11 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
-          - dynamodb:Query
+          - dynamodb:GetItem
           - dynamodb:DeleteItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.INDEX_NAME}
+
+
   # TODO: Configure this function
   GenerateUploadUrl:
     handler: src/lambda/http/generateUploadUrl.handler
@@ -219,6 +221,8 @@ resources:
               ProjectionType: ALL
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.TODOS_TABLE}
+
+        
 
     AttachmentBucket:
       Type: AWS::S3::Bucket
