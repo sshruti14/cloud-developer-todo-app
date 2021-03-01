@@ -1,10 +1,11 @@
 import * as AWS from "aws-sdk";
-import * as AWSXRAY from "aws-xray-sdk";
+//import * as AWSXRAY from "aws-xray-sdk";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 import { TodoItem } from "../models/TodoItem";
 import { TodoUpdate } from "../models/TodoUpdate";
+const AWSXRay = require('aws-xray-sdk')
 
-const XAWS = AWSXRAY.captureAWS(AWS);
+const XAWS = AWSXRay.captureAWS(AWS);
 
 function createDynamoDBClient(): DocumentClient {
   if (process.env.IS_OFFLINE) {
@@ -119,8 +120,8 @@ export class TodoAccessModel {
       .delete({
         TableName: this.todosTable,
         Key: {
-          userId,
           todoId,
+          userId,
         },
       })
       .promise();

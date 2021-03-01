@@ -22,14 +22,14 @@ const deleteHandler: APIGatewayProxyHandler = async (
   const split = authorization.split(" ");
   const jwtToken = split[1];
 
-  await deleteTodo(todoId, jwtToken);
+  const result = await deleteTodo(todoId, jwtToken);
   return {
     statusCode: 204,
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Credentials": true,
     },
-    body: "Item deleted successfully",
+    body: JSON.stringify({item:result})
   };
 };
 

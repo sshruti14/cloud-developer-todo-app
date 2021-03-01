@@ -1,6 +1,6 @@
 
 service:
-  name: sshruti14-serverless-todo-app
+  name: serverless-todo-app
 
 plugins:
   - serverless-webpack
@@ -32,7 +32,7 @@ provider:
   environment:
     TODOS_TABLE: Todos-${self:provider.stage}
     AUTH_0_SECRET: cO0ILpysCr4RKSUDwzSDJ1sbGAeuBNkpZSMr1xIrXwJx5C1qQdVXBMjb8F4aub0v
-    S3_BUCKET: 'sshruti-serverless-todo-${self:provider.stage}'
+    S3_BUCKET: 'serverless-todo-${self:provider.stage}'
     SIGNED_URL_EXPIRATION: 300
     INDEX_NAME: UserIdIndex
 
@@ -41,6 +41,10 @@ custom:
   serverless-offline:
     host: 0.0.0.0
     port: 4000
+
+  webpackIncludeModules:
+    forceExclude:
+      - aws-sdk
 
   dynamodb:
     stages:
@@ -148,10 +152,12 @@ functions:
           method: delete
           path: todos/{todoId}
           cors: true
+        
     iamRoleStatementsName: ${self:service.name}-delete-todo-role-${self:provider.stage}
     iamRoleStatements:
       - Effect: Allow
         Action:
+          - dynamodb:Query
           - dynamodb:DeleteItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.INDEX_NAME}
   # TODO: Configure this function
@@ -166,12 +172,14 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
+          - dynamodb:Query
           - dynamodb:UpdateItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
       - Effect: Allow
         Action:
           - s3:PutObject
           - s3:GetObject
+          - '*'
         Resource: arn:aws:s3:::${self:provider.environment.S3_BUCKET}/*
 
 resources:
