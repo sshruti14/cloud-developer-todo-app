@@ -17,6 +17,10 @@ export const handler: APIGatewayProxyHandler = async (
   logger.info("EVENT:", event);
 
   const todoId = event.pathParameters.todoId;
+  const authorization = event.headers.Authorization;
+  const split = authorization.split(" ");
+  const jwtToken = split[1];
+
   const updatedTodo: UpdateTodoRequest = JSON.parse(event.body);
 
   const todosTable = process.env.TODOS_TABLE;
@@ -25,7 +29,10 @@ export const handler: APIGatewayProxyHandler = async (
 
   const updateTodoParams = {
     TableName: todosTable,
-    Key: { todoId: todoId },
+    Key: { 
+    todoId: todoId,
+    userId: jwtToken, 
+     },
     UpdateExpression: "set #n = :a, dueDate = :b, done = :c",
     ExpressionAttributeValues: {
       ":a": updatedTodo["name"],

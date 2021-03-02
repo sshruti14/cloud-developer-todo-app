@@ -23,8 +23,12 @@ export const handler: APIGatewayProxyHandler = async (
   const urlExperationTime = process.env.SIGNED_URL_EXPIRATION;
   const todosTable = process.env.TODOS_TABLE;
 
+  const authorization = event.headers.Authorization;
+  const split = authorization.split(" ");
+  const jwtToken = split[1];
+
   const s3 = new AWS.S3({
-    signatureVersion: "v4",
+    signatureVersion: 'v4',
   });
 
   // DONE: Return a presigned URL to upload a file for a TODO item with the provided id
@@ -38,7 +42,10 @@ export const handler: APIGatewayProxyHandler = async (
 
   const updateUrlOnTodo = {
     TableName: todosTable,
-    Key: { todoId: todoId },
+    Key: { 
+      todoId: todoId,
+      userId: jwtToken, 
+       },
     UpdateExpression: "set attachmentUrl = :a",
     ExpressionAttributeValues: {
       ":a": imageUrl,
