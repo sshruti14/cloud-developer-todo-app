@@ -70,7 +70,7 @@ export class TodoAccessModel {
 
   public async update(
     todoId: string,
-    createdAt: string,
+    userId: string,
     todoUpdate: TodoUpdate
   ): Promise<void> {
     this.documentClient
@@ -78,7 +78,7 @@ export class TodoAccessModel {
         TableName: this.todosTable,
         Key: {
           todoId,
-          createdAt,
+          userId,
         },
         UpdateExpression: "set #n = :name, done = :done, dueDate = :dueDate",
         ExpressionAttributeValues: {

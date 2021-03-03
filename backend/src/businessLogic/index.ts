@@ -9,9 +9,7 @@ import { UpdateTodoRequest } from "../requests/UpdateTodoRequest";
 const todoAccessModel = new TodoAccessModel();
 
 export async function getAllTodos(jwtToken: string): Promise<TodoItem[]> {
-  const userId = parseUserId(jwtToken);
-
-  return todoAccessModel.all(userId);
+  return todoAccessModel.all(jwtToken);
 }
 
 export async function createTodo(
@@ -19,11 +17,10 @@ export async function createTodo(
   jwtToken: string
 ): Promise<TodoItem> {
   const itemId = uuid.v4();
-  const userId = parseUserId(jwtToken);
 
   return todoAccessModel.create({
     todoId: itemId,
-    userId: userId,
+    userId: jwtToken,
     name: createTodoRequest.name,
     dueDate: createTodoRequest.dueDate,
     createdAt: new Date().toISOString(),
@@ -39,15 +36,15 @@ export async function update(
   const userId = parseUserId(jwtToken);
   const todo = await todoAccessModel.get(todoId, userId);
 
-  todoAccessModel.update(todo.todoId, todo.createdAt, updateTodoRequest);
+  todoAccessModel.update(todo.todoId, todo.userId, updateTodoRequest);
 }
 
 export async function deleteTodo(
   todoId: string,
   jwtToken: string
 ): Promise<void> {
-  const userId = parseUserId(jwtToken);
-  const todo = await todoAccessModel.get(todoId, userId);
+  //const userId = parseUserId(jwtToken);
+  const todo = await todoAccessModel.get(todoId, jwtToken);
 
   await todoAccessModel.delete(todo.todoId, todo.userId);
 }
@@ -57,8 +54,8 @@ export async function setAttachmentUrl(
   attachmentUrl: string,
   jwtToken: string
 ): Promise<void> {
-  const userId = parseUserId(jwtToken);
-  const todo = await todoAccessModel.get(todoId, userId);
+  //const userId = parseUserId(jwtToken);
+  const todo = await todoAccessModel.get(todoId, jwtToken);
 
   todoAccessModel.setAttachmentUrl(todo.todoId, todo.userId, attachmentUrl);
 }

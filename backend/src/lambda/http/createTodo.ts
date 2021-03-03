@@ -10,6 +10,7 @@ import { CreateTodoRequest } from "../../requests/CreateTodoRequest";
 import { createTodo } from "../../businessLogic/";
 import { createLogger } from "../../utils/logger";
 
+
 const createHandler: APIGatewayProxyHandler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
@@ -22,6 +23,9 @@ const createHandler: APIGatewayProxyHandler = async (
   const authorization = event.headers.Authorization;
   const split = authorization.split(" ");
   const jwtToken = split[1];
+  //const userId = parseUserId(jwtToken);
+
+
 
   const newItem = await createTodo(newTodo, jwtToken);
   return {

@@ -6,7 +6,7 @@ import {
 } from "aws-lambda";
 import { createLogger } from "../../utils/logger";
 import * as AWS from "aws-sdk";
-import * as uuid from "uuid";
+import { recoverS3PreSignedUrl,recoverS3AttachmentURL } from '../../utils/s3';
 
 const docClient = new AWS.DynamoDB.DocumentClient();
 
@@ -17,28 +17,18 @@ export const handler: APIGatewayProxyHandler = async (
   logger.info("Event data", event);
 
   const todoId = event.pathParameters.todoId;
-  const imageId = uuid.v4();
 
-  const bucket = process.env.S3_BUCKET;
-  const urlExperationTime = process.env.SIGNED_URL_EXPIRATION;
   const todosTable = process.env.TODOS_TABLE;
 
   const authorization = event.headers.Authorization;
   const split = authorization.split(" ");
   const jwtToken = split[1];
 
-  const s3 = new AWS.S3({
-    signatureVersion: 'v4',
-  });
 
   // DONE: Return a presigned URL to upload a file for a TODO item with the provided id
-  const url = s3.getSignedUrl("putObject", {
-    Bucket: bucket,
-    Key: imageId,
-    Expires: parseInt(urlExperationTime),
-  });
+  const url = recoverS3PreSignedUrl(todoId)
+   const imageUrl = recoverS3AttachmentURL(todoId)
 
-  const imageUrl = `https://${bucket}.s3.amazonaws.com/${imageId}`;
 
   const updateUrlOnTodo = {
     TableName: todosTable,
